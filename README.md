@@ -1,8 +1,9 @@
-#Free Code Camp HyperDev Challenges
+#Free Code Camp Backend Challenges on Gomix
 ## 2. Node-Express
 
-Hyperdev boilerplate Background App.
-It implements the remote testing logic for the HyperDev Challenge Projects.
+Gomix boilerplate #2 - Background App package
+
+Remote testing background framework for the Gomix boilerplate #2.
 
 
 License

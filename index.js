@@ -35,9 +35,9 @@ var selfCaller = function(path, req, res, cb, url) {
 
 var enableCORS = function(req, res, next) {
   if (!process.env.DISABLE_XORIGIN) {
-    var allowedOrigins = ['https://marsh-glazer.hyperdev.space', 'https://www.freecodecamp.com'];
+    var allowedOrigins = ['https://narrow-plane.gomix.me', 'https://www.freecodecamp.com'];
     var origin = req.headers.origin;
-    if(process.env.XORIG_ALL || allowedOrigins.indexOf(origin) > -1) {
+    if(!process.env.XORIG_RESTRICT || allowedOrigins.indexOf(origin) > -1) {
        res.set({
         'Access-Control-Allow-Origin': origin,
         "Access-Control-Allow-Headers" : "Origin, X-Requested-With, Content-Type, Accept"

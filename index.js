@@ -70,37 +70,34 @@ function setupBackgroundApp(app, myApp, dirname) {
   });
 
   app.get('/_api/use-env-vars', function(req, res, next) {
-    fs.readFile(path.join(dirname, '.env'), function(err, data) {
-      if (err) { return next(err) }
-      var foundVar = !!data.toString().match(/MESSAGE_STYLE=uppercase/);
-      if (!foundVar) return res.json({passed: false});
-      var envvar = process.env.MESSAGE_STYLE;
-      process.env.MESSAGE_STYLE = undefined;
-      selfCaller('/json', req, res, function(lowerCase, req, res) {
-        debugger
+    var foundVar = process.env.MESSAGE_STYLE === 'uppercase';
+    if (!foundVar) return res.json({passed: false});
+    var envvar = process.env.MESSAGE_STYLE;
+    process.env.MESSAGE_STYLE = undefined;
+    selfCaller('/json', req, res, function(lowerCase, req, res) {
+      debugger
+      try {
+        lowerCase = JSON.parse(lowerCase).message;
+      } catch(e) {
+        console.log(e);
+        next(e);
+      }
+      process.env.MESSAGE_STYLE = 'uppercase';
+      selfCaller('/json', req, res, function(upperCase, req, res) {
         try {
-          lowerCase = JSON.parse(lowerCase).message;
+          upperCase = JSON.parse(upperCase).message;
         } catch(e) {
           console.log(e);
           next(e);
         }
-        process.env.MESSAGE_STYLE = 'uppercase';
-        selfCaller('/json', req, res, function(upperCase, req, res) {
-          try {
-            upperCase = JSON.parse(upperCase).message;
-          } catch(e) {
-            console.log(e);
-            next(e);
-          }
-          process.env.MESSAGE_STYLE = envvar;
-          if(lowerCase === 'Hello json' && upperCase === 'HELLO JSON'){
-            res.json({ passed: true });
-          } else {
-            res.json({ passed: false });
-          }
-        });
-      })
-    });
+        process.env.MESSAGE_STYLE = envvar;
+        if(lowerCase === 'Hello json' && upperCase === 'HELLO JSON'){
+          res.json({ passed: true });
+        } else {
+          res.json({ passed: false });
+        }
+      });
+    })
   });
 
   var simpleLogCB = function (data, req, res) {

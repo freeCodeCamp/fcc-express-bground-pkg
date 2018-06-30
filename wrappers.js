@@ -14,16 +14,23 @@ console.log = function() {
   var args = Array.prototype.slice.call(arguments);
 
   // Check if this message solves any of the challenges that make use of console.log()
-  testLogMessage(args[0])
+  testLogMessage(args)
 
   // Execute the original console.log() provided args
   log.apply(null, args);
 }
 
 // Verify if a log message solves the expected log for certain challenges
-function testLogMessage (msg) {
-  // Prevent error messages when logging objects and stuff
-  if (typeof msg !== 'string') return
+function testLogMessage (args) {
+  var msg = '';
+  try {
+    // build the log string
+    msg = args
+      .map(function(arg) {return arg.toString()})
+      .join(' ');  
+  } catch (e) {
+    log('log error - invalid arguments passed to console.log', e);
+  } 
 
   // Check if it solves the hello-console challenge.
   if (msg.toLowerCase().match(/^hello,?\sworld!?$/)) {

@@ -64,7 +64,7 @@ function setupBackgroundApp(app, myApp, dirname) {
     res.json({ passed: globals.userPassedConsoleChallenge });
   });
 
-  app.get('/_api/json', function (req, res) {
+  app.get('/_api/json', function (req, res, next) {
     var msgStyle = process.env.MESSAGE_STYLE;
     process.env.MESSAGE_STYLE = undefined;
     selfCaller('/json', req, res, function (lowerCase, req, res) {

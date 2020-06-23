@@ -3,7 +3,6 @@
  * the verification process may break
  * ***************************************************/
 
-
 'use strict';
 
 var fs = require('fs');
@@ -14,34 +13,46 @@ var globals = require('./globals');
 
 var http = require('http');
 var https = require('https');
-var selfCaller = function(path, req, res, cb, url) {
+var selfCaller = function (path, req, res, cb, url) {
   var url = req.get('host').split(':');
   var port = url[1];
   url = url[0];
   var prot = req.protocol === 'https' ? https : http;
   var opts = {
-    hostname : url,
-    method : 'GET',
-    path : path,
-    port : port || 80
+    hostname: url,
+    method: 'GET',
+    path: path,
+    port: port || 80,
+    headers: {
+      'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
+    },
   };
-  var rq = prot.request(opts, function(r){
-    r.on('data', (d) => {cb(d.toString(), req, res, r.headers)});
-    r.on('error', () => {res.status(500).type('txt').send('SERVER ERROR')});
+  var rq = prot.request(opts, function (r) {
+    r.on('data', (d) => {
+      cb(d.toString(), req, res, r.headers);
+    });
+    r.on('error', () => {
+      res.status(500).type('txt').send('SERVER ERROR');
+    });
     r.resume();
   });
   rq.end();
 };
 
-var enableCORS = function(req, res, next) {
+var enableCORS = function (req, res, next) {
   if (!process.env.DISABLE_XORIGIN) {
-    var allowedOrigins = ['https://narrow-plane.gomix.me', 'https://www.freecodecamp.com'];
+    var allowedOrigins = [
+      'https://narrow-plane.gomix.me',
+      'https://www.freecodecamp.com',
+    ];
     var origin = req.headers.origin;
-    if(!process.env.XORIG_RESTRICT || allowedOrigins.indexOf(origin) > -1) {
-       res.set({
+    if (!process.env.XORIG_RESTRICT || allowedOrigins.indexOf(origin) > -1) {
+      res.set({
         'Access-Control-Allow-Origin': origin,
-        "Access-Control-Allow-Headers" : "Origin, X-Requested-With, Content-Type, Accept"
-       });
+        'Access-Control-Allow-Headers':
+          'Origin, X-Requested-With, Content-Type, Accept',
+      });
     }
   }
   next();
@@ -49,18 +60,18 @@ var enableCORS = function(req, res, next) {
 
 function setupBackgroundApp(app, myApp, dirname) {
   app.use(enableCORS);
-  app.get('/_api/hello-console', function(req, res) {
-    res.json({passed: globals.userPassedConsoleChallenge});
+  app.get('/_api/hello-console', function (req, res) {
+    res.json({ passed: globals.userPassedConsoleChallenge });
   });
 
-  app.get('/_api/json', function(req, res) {
+  app.get('/_api/json', function (req, res, next) {
     var msgStyle = process.env.MESSAGE_STYLE;
     process.env.MESSAGE_STYLE = undefined;
-    selfCaller('/json', req, res, function(lowerCase, req, res) {
+    selfCaller('/json', req, res, function (lowerCase, req, res) {
       process.env.MESSAGE_STYLE = msgStyle;
       try {
         lowerCase = JSON.parse(lowerCase);
-      } catch(e) {
+      } catch (e) {
         console.log(e);
         process.env.MESSAGE_STYLE = msgStyle;
         next(e);
@@ -69,41 +80,41 @@ function setupBackgroundApp(app, myApp, dirname) {
     });
   });
 
-  app.get('/_api/use-env-vars', function(req, res, next) {
+  app.get('/_api/use-env-vars', function (req, res, next) {
     var foundVar = process.env.MESSAGE_STYLE === 'uppercase';
-    if (!foundVar) return res.json({passed: false});
+    if (!foundVar) return res.json({ passed: false });
     var envvar = process.env.MESSAGE_STYLE;
     process.env.MESSAGE_STYLE = undefined;
-    selfCaller('/json', req, res, function(lowerCase, req, res) {
-      debugger
+    selfCaller('/json', req, res, function (lowerCase, req, res) {
+      debugger;
       try {
         lowerCase = JSON.parse(lowerCase).message;
-      } catch(e) {
+      } catch (e) {
         console.log(e);
         next(e);
       }
       process.env.MESSAGE_STYLE = 'uppercase';
-      selfCaller('/json', req, res, function(upperCase, req, res) {
+      selfCaller('/json', req, res, function (upperCase, req, res) {
         try {
           upperCase = JSON.parse(upperCase).message;
-        } catch(e) {
+        } catch (e) {
           console.log(e);
           next(e);
         }
         process.env.MESSAGE_STYLE = envvar;
-        if(lowerCase === 'Hello json' && upperCase === 'HELLO JSON'){
+        if (lowerCase === 'Hello json' && upperCase === 'HELLO JSON') {
           res.json({ passed: true });
         } else {
           res.json({ passed: false });
         }
       });
-    })
+    });
   });
 
   var simpleLogCB = function (data, req, res) {
-    res.json({passed : globals.userPassedLoggerChallenge });
+    res.json({ passed: globals.userPassedLoggerChallenge });
   };
-  app.get('/_api/root-middleware-logger', function(req, res){
+  app.get('/_api/root-middleware-logger', function (req, res) {
     globals.userPassedLoggerChallenge = false;
     selfCaller('/json', req, res, simpleLogCB);
   });
@@ -118,71 +129,71 @@ function setupBackgroundApp(app, myApp, dirname) {
     timeObj.stackLength = globals.nowRouteStackLength;
     res.json(timeObj);
   };
-  app.get('/_api/chain-middleware-time', function(req, res) {
+  app.get('/_api/chain-middleware-time', function (req, res) {
     selfCaller('/now', req, res, routeTimeCB);
   });
 
-  app.get('/_api/add-body-parser', function(req, res) {
-    res.json({mountedAt: globals.bodyParserMountPosition});
+  app.get('/_api/add-body-parser', function (req, res) {
+    res.json({ mountedAt: globals.bodyParserMountPosition });
   });
 
-
-  app.get('/_api/files/*?', function(req, res, next) {
+  app.get('/_api/files/*?', function (req, res, next) {
     // exclude .env
-    if(req.params[0] === '.env') {
-      return next({status: 401, message: 'ACCESS DENIED'})
+    if (req.params[0] === '.env') {
+      return next({ status: 401, message: 'ACCESS DENIED' });
     }
-    fs.readFile(path.join(dirname, req.params[0]), function(err, data) {
-      if (err) { return next(err) }
+    fs.readFile(path.join(dirname, req.params[0]), function (err, data) {
+      if (err) {
+        return next(err);
+      }
       res.type('txt').send(data.toString());
     });
   });
 
   // (almost) safely mount the practicing app
   try {
-
     //myApp.use(enableCORS);
     app.use('/', myApp);
-    var stack = (myApp._router && myApp._router.stack) || []; 
-    var layers = stack.map(l => l.name)
+    var stack = (myApp._router && myApp._router.stack) || [];
+    var layers = stack.map((l) => l.name);
 
     // check if body-parser is mounted
     var BPmountPos = layers.indexOf('urlencodedParser');
     globals.bodyParserMountPosition = BPmountPos > -1 ? BPmountPos - 1 : 0;
 
-     // check if cookie-parser is mounted
+    // check if cookie-parser is mounted
     var CPmountPos = layers.indexOf('cookieParser');
     globals.cookieParserMountPosition = CPmountPos > -1 ? CPmountPos - 1 : 0;
 
     // check if /now route has a middleware before the handler
-    var nowRoute = stack.filter(l => {
-      if(l.route) {
-        return l.route.path === '/now'
+    var nowRoute = stack.filter((l) => {
+      if (l.route) {
+        return l.route.path === '/now';
       }
       return false;
-    })
-    if(nowRoute.length > 0) {
+    });
+    if (nowRoute.length > 0) {
       nowRoute = nowRoute[0];
       globals.nowRouteStackLength = nowRoute.route.stack.length;
     }
-
   } catch (e) {
     console.log(e);
   }
 
   // Error Handling
-  app.use(function(err, req, res, next) {
-    if(err) {
-      return res.status(err.status || 500)
+  app.use(function (err, req, res, next) {
+    if (err) {
+      return res
+        .status(err.status || 500)
         .type('txt')
         .send(err.message || 'SERVER ERROR');
     }
-  })
+  });
 
   // Not Found Handling
-  app.use(function(req, res, next) {
+  app.use(function (req, res, next) {
     res.status(404).type('txt').send('Not Found');
-  })
+  });
   return app;
 }
 

@@ -18,6 +18,7 @@ var selfCaller = function (path, req, res, cb, url) {
   var port = url[1];
   url = url[0];
   var prot = req.protocol === 'https' ? https : http;
+  console.log(port, prot, url, path);
   var opts = {
     hostname: url,
     method: 'GET',

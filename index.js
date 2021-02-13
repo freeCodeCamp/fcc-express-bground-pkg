@@ -11,19 +11,17 @@ var path = require('path');
 var log = require('./wrappers');
 var globals = require('./globals');
 
-var http = require('http');
 var https = require('https');
 var selfCaller = function (path, req, res, cb, url) {
   var url = req.get('host').split(':');
   var port = url[1];
   url = url[0];
-  var prot = req.protocol === 'https' ? https : http;
-  console.log(port, prot, url, path);
+  var prot = https;
   var opts = {
     hostname: url,
     method: 'GET',
     path: path,
-    port: port || 80,
+    port: port || 443,
     headers: {
       'User-Agent':
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
@@ -45,7 +43,7 @@ var enableCORS = function (req, res, next) {
   if (!process.env.DISABLE_XORIGIN) {
     var allowedOrigins = [
       'https://narrow-plane.gomix.me',
-      'https://www.freecodecamp.com',
+      'https://www.freecodecamp.org',
     ];
     var origin = req.headers.origin;
     if (!process.env.XORIG_RESTRICT || allowedOrigins.indexOf(origin) > -1) {

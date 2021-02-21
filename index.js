@@ -22,7 +22,7 @@ var selfCaller = function (path, req, res, cb, url) {
     hostname: url,
     method: 'GET',
     path: path,
-    port: port || 80,
+    port: req.protocol === 'https' ? 443 : port || 80,
     headers: {
       'User-Agent':
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
@@ -59,6 +59,7 @@ var enableCORS = function (req, res, next) {
 };
 
 function setupBackgroundApp(app, myApp, dirname) {
+  app.set('trust proxy', true);
   app.use(enableCORS);
   app.get('/_api/hello-console', function (req, res) {
     res.json({ passed: globals.userPassedConsoleChallenge });

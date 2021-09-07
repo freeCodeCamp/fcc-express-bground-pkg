@@ -17,7 +17,14 @@ var selfCaller = function (path, req, res, cb, url) {
   var url = req.get('host').split(':');
   var port = url[1];
   url = url[0];
-  var prot = req.protocol === 'https' ? https : http;
+  var prot;
+  if(req.headers['x-forwarded-proto'] && req.headers['cdn-loop'] === 'cloudflare') {
+    let forwardedProto = req.headers['x-forwarded-proto']
+    prot = forwardedProto === 'https' ? https : http;
+    port = forwardedProto === 'https' ? 443 : 80;
+  } else {
+    prot = req.protocol === 'https' ? https : http;
+  }
   var opts = {
     hostname: url,
     method: 'GET',

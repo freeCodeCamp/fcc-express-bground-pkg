@@ -5,30 +5,30 @@
 
 'use strict';
 
-var fs = require('fs');
-var path = require('path');
+const fs = require('fs');
+const path = require('path');
 
-var log = require('./wrappers');
-var globals = require('./globals');
+const log = require('./wrappers');
+const globals = require('./globals');
 
-var http = require('http');
-var https = require('https');
-var selfCaller = function (path, req, res, cb, url) {
-  var url = req.get('host').split(':');
-  var port = url[1];
-  url = url[0];
-  var prot = req.protocol === 'https' ? https : http;
-  var opts = {
-    hostname: url,
+const http = require('http');
+const https = require('https');
+const selfCaller = function (path, req, res, cb) {
+  const HOSTNAME = req.hostname;
+  const PORT = req.get('host').split(':')[1];
+
+  const prot = req.protocol === 'https' ? https : http;
+  const opts = {
+    hostname: HOSTNAME,
     method: 'GET',
     path: path,
-    port: req.protocol === 'https' ? 443 : port || 80,
+    port: req.protocol === 'https' ? 443 : PORT || 80,
     headers: {
       'User-Agent':
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
     },
   };
-  var rq = prot.request(opts, function (r) {
+  const rq = prot.request(opts, function (r) {
     r.on('data', (d) => {
       cb(d.toString(), req, res, r.headers);
     });
@@ -40,13 +40,13 @@ var selfCaller = function (path, req, res, cb, url) {
   rq.end();
 };
 
-var enableCORS = function (req, res, next) {
+const enableCORS = function (req, res, next) {
   if (!process.env.DISABLE_XORIGIN) {
     var allowedOrigins = [
       'https://narrow-plane.gomix.me',
       'https://www.freecodecamp.com',
     ];
-    var origin = req.headers.origin;
+    const origin = req.headers.origin;
     if (!process.env.XORIG_RESTRICT || allowedOrigins.indexOf(origin) > -1) {
       res.set({
         'Access-Control-Allow-Origin': origin,
@@ -66,15 +66,15 @@ function setupBackgroundApp(app, myApp, dirname) {
   });
 
   app.get('/_api/json', function (req, res, next) {
-    var msgStyle = process.env.MESSAGE_STYLE;
+    const MESSAGE_STYLE = process.env.MESSAGE_STYLE;
     process.env.MESSAGE_STYLE = undefined;
     selfCaller('/json', req, res, function (lowerCase, req, res) {
-      process.env.MESSAGE_STYLE = msgStyle;
+      process.env.MESSAGE_STYLE = MESSAGE_STYLE;
       try {
         lowerCase = JSON.parse(lowerCase);
       } catch (e) {
         console.log(e);
-        process.env.MESSAGE_STYLE = msgStyle;
+        process.env.MESSAGE_STYLE = MESSAGE_STYLE;
         next(e);
       }
       res.json(lowerCase);
@@ -82,14 +82,15 @@ function setupBackgroundApp(app, myApp, dirname) {
   });
 
   app.get('/_api/use-env-vars', function (req, res, next) {
-    var foundVar = process.env.MESSAGE_STYLE === 'uppercase';
-    if (!foundVar) return res.json({ passed: false });
-    var envvar = process.env.MESSAGE_STYLE;
-    process.env.MESSAGE_STYLE = undefined;
+    const MESSAGE_STYLE = process.env.MESSAGE_STYLE;
+    if (MESSAGE_STYLE !== 'uppercase') return res.json({ passed: false });
+
+    let lowerCaseMessage, upperCaseMessage;
+    delete process.env.MESSAGE_STYLE;
+
     selfCaller('/json', req, res, function (lowerCase, req, res) {
-      debugger;
       try {
-        lowerCase = JSON.parse(lowerCase).message;
+        lowerCaseMessage = JSON.parse(lowerCase).message;
       } catch (e) {
         console.log(e);
         next(e);
@@ -97,13 +98,16 @@ function setupBackgroundApp(app, myApp, dirname) {
       process.env.MESSAGE_STYLE = 'uppercase';
       selfCaller('/json', req, res, function (upperCase, req, res) {
         try {
-          upperCase = JSON.parse(upperCase).message;
+          upperCaseMessage = JSON.parse(upperCase).message;
         } catch (e) {
           console.log(e);
           next(e);
         }
-        process.env.MESSAGE_STYLE = envvar;
-        if (lowerCase === 'Hello json' && upperCase === 'HELLO JSON') {
+        process.env.MESSAGE_STYLE = MESSAGE_STYLE;
+        if (
+          lowerCaseMessage === 'Hello json' &&
+          upperCaseMessage === 'HELLO JSON'
+        ) {
           res.json({ passed: true });
         } else {
           res.json({ passed: false });
@@ -112,16 +116,17 @@ function setupBackgroundApp(app, myApp, dirname) {
     });
   });
 
-  var simpleLogCB = function (data, req, res) {
+  const simpleLogCB = function (data, req, res) {
     res.json({ passed: globals.userPassedLoggerChallenge });
   };
+
   app.get('/_api/root-middleware-logger', function (req, res) {
     globals.userPassedLoggerChallenge = false;
     selfCaller('/json', req, res, simpleLogCB);
   });
 
-  var routeTimeCB = function (data, req, res) {
-    var timeObj;
+  const routeTimeCB = function (data, req, res) {
+    let timeObj;
     try {
       timeObj = JSON.parse(data);
     } catch (e) {
@@ -130,6 +135,7 @@ function setupBackgroundApp(app, myApp, dirname) {
     timeObj.stackLength = globals.nowRouteStackLength;
     res.json(timeObj);
   };
+
   app.get('/_api/chain-middleware-time', function (req, res) {
     selfCaller('/now', req, res, routeTimeCB);
   });
@@ -153,29 +159,27 @@ function setupBackgroundApp(app, myApp, dirname) {
 
   // (almost) safely mount the practicing app
   try {
-    //myApp.use(enableCORS);
     app.use('/', myApp);
-    var stack = (myApp._router && myApp._router.stack) || [];
-    var layers = stack.map((l) => l.name);
+    const stack = (myApp._router && myApp._router.stack) || [];
+    const layers = stack.map((l) => l.name);
 
     // check if body-parser is mounted
-    var BPmountPos = layers.indexOf('urlencodedParser');
+    const BPmountPos = layers.indexOf('urlencodedParser');
     globals.bodyParserMountPosition = BPmountPos > -1 ? BPmountPos - 1 : 0;
 
     // check if cookie-parser is mounted
-    var CPmountPos = layers.indexOf('cookieParser');
+    const CPmountPos = layers.indexOf('cookieParser');
     globals.cookieParserMountPosition = CPmountPos > -1 ? CPmountPos - 1 : 0;
 
     // check if /now route has a middleware before the handler
-    var nowRoute = stack.filter((l) => {
+    const nowRoute = stack.filter((l) => {
       if (l.route) {
         return l.route.path === '/now';
       }
       return false;
     });
     if (nowRoute.length > 0) {
-      nowRoute = nowRoute[0];
-      globals.nowRouteStackLength = nowRoute.route.stack.length;
+      globals.nowRouteStackLength = nowRoute[0].route.stack.length;
     }
   } catch (e) {
     console.log(e);

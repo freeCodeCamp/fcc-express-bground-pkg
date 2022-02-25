@@ -1,18 +1,22 @@
 {
-	"name": "fcc-express-bground",
-	"version": "0.0.5",
-  "author": {
-    "name" : "em-ant",
-    "email" : "joshua999x@gmail.com"
-    },
-  "keywords" : [
-    "freecodecamp",
+  "name": "fcc-express-bground",
+  "version": "0.0.6",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/freeCodeCamp/fcc-express-bground-pkg.git"
+  },
+  "bugs": {
+    "url": "https://github.com/freeCodeCamp/freeCodeCamp/issues"
+  },
+  "homepage": "https://github.com/freeCodeCamp/fcc-express-bground-pkg#readme",
+  "author": "freeCodeCamp <team@freecodecamp.org>",
+  "main": "index.js",
+  "keywords": [
+    "freeCodeCamp",
     "boilerplate",
     "challenges",
     "node-express",
-    "background-app",
-    "hyperdev"
+    "background-app"
   ],
-	"main": "index.js",
   "license": "(BSD-3-Clause AND CC-BY-SA-4.0)"
 }

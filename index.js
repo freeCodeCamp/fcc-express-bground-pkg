@@ -86,7 +86,7 @@ function setupBackgroundApp(app, myApp, dirname) {
     if (MESSAGE_STYLE !== 'uppercase') return res.json({ passed: false });
 
     let lowerCaseMessage, upperCaseMessage;
-    delete process.env.MESSAGE_STYLE;
+    process.env.MESSAGE_STYLE = 'othercase';
 
     selfCaller('/json', req, res, function (lowerCase, req, res) {
       try {

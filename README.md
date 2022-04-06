@@ -1,13 +1,12 @@
-#Free Code Camp Backend Challenges on Gomix
+# freeCodeCamp Backend Challenges helper library
+
 ## 2. Node-Express
 
-Gomix boilerplate #2 - Background App package
+Boilerplate - Background App package
 
-Remote testing background framework for the Gomix boilerplate #2.
+Remote testing background framework for the boilerplate.
 
-
-License
--------
+## License
 
 The BSD-3-Clause
 

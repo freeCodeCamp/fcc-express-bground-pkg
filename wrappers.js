@@ -4,6 +4,7 @@
  * ***************************************************/
 
 const globals = require('./globals');
+const ip = require("ip");
 
 // Store a reference to the original console.log()
 const log = console.log;
@@ -40,12 +41,14 @@ function testLogMessage(args) {
   }
 
   // Check if it solves the simple-middleware-logger challenge.
+  const simpleLogSplit = msg.split("-");
+  const ipAddress = simpleLogSplit[1];
   if (
-    msg.match(
-      /(GET|POST|PUT|DELETE|CONNECT|HEAD|OPTIONS|TRACE)\s\/.*\s\-\s.*(\d{1,3}\.){3}\d{1,3}/
-    )
+    msg.match(/(GET|POST|PUT|DELETE|CONNECT|HEAD|OPTIONS|TRACE)\s\/.*\s\-/)
   ) {
-    globals.userPassedLoggerChallenge = true;
+    if (ip.isV4Format(ipAddress.trim()) || ip.isV6Format(ipAddress.trim())) {
+      globals.userPassedLoggerChallenge = true;
+    }
   }
 }
 

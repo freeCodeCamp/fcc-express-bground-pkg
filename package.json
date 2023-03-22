@@ -18,5 +18,8 @@
     "node-express",
     "background-app"
   ],
-  "license": "(BSD-3-Clause AND CC-BY-SA-4.0)"
+  "license": "(BSD-3-Clause AND CC-BY-SA-4.0)",
+  "dependencies": {
+    "ip": "^1.1.8"
+  }
 }

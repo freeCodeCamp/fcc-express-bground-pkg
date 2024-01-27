@@ -1,0 +1,57 @@
+repo_name: freeCodeCamp/fcc-express-bground-pkg
+report_id: 139d555b1c21dc6122166ba723643f19
+version: 0.1
+repo_type: Public
+timestamp: '2024-01-27T03:50:29+00:00'
+requested_by: a2937
+provider: github
+branch: main
+detected_tools_count: 4
+tools:
+- name: JavaScript
+  description: Lightweight, interpreted, object-oriented language with first-class
+    functions
+  website_url: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+  open_source: true
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Languages
+  image_url: https://img.stackshare.io/service/1209/javascript.jpeg
+  detection_source_url: https://github.com/freeCodeCamp/fcc-express-bground-pkg
+  detection_source: Repo Metadata
+- name: Git
+  description: Fast, scalable, distributed revision control system
+  website_url: http://git-scm.com/
+  open_source: true
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Version Control System
+  image_url: https://img.stackshare.io/service/1046/git.png
+  detection_source_url: https://github.com/freeCodeCamp/fcc-express-bground-pkg
+  detection_source: Repo Metadata
+- name: npm
+  description: The package manager for JavaScript.
+  website_url: https://www.npmjs.com/
+  open_source: false
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Front End Package Manager
+  image_url: https://img.stackshare.io/service/1120/lejvzrnlpb308aftn31u.png
+  detection_source_url: https://github.com/freeCodeCamp/fcc-express-bground-pkg/blob/main/package.json
+  detection_source: package.json
+  last_updated_by: EmAnt
+  last_updated_on: 2016-12-16 19:43:41.000000000 Z
+- name: ip
+  description: "[![]"
+  package_url: https://www.npmjs.com/ip
+  version: 1.1.8
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: npm Packages
+  image_url: https://img.stackshare.io/package/16483/default_fc6e1fc17e404d936593b5b901d67abb3386daa3.png
+  detection_source_url: https://github.com/freeCodeCamp/fcc-express-bground-pkg/blob/main/package-lock.json
+  detection_source: package.json
+  last_updated_by: EmAnt
+  last_updated_on: 2016-12-16 19:43:41.000000000 Z
